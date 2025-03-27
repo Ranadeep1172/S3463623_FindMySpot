@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "184482227658",
+    "project_id": "findmyspot-c4985",
+    "storage_bucket": "findmyspot-c4985.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:184482227658:android:824c8ebaba85ab7611db33",
+        "android_client_info": {
+          "package_name": "uk.ac.tees.mad.findmyspot"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbfWw2NR7cdW0d4cVz5uTtPEn7GRBQ5vU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
