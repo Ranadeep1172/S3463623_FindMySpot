@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import uk.ac.tees.mad.findmyspot.ui.screens.AuthScreen
 import uk.ac.tees.mad.findmyspot.ui.screens.SplashScreen
 
 @Composable
@@ -17,7 +18,7 @@ fun AppNavigation() {
         }
 
         composable("auth") {
-
+            AuthScreen(navController)
         }
         composable("home") {
 
