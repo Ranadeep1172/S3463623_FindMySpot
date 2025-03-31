@@ -19,5 +19,8 @@ fun AppNavigation() {
         composable("auth") {
 
         }
+        composable("home") {
+
+        }
     }
 }

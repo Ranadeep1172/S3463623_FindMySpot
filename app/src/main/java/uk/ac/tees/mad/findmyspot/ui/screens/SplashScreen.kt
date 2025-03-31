@@ -1,5 +1,6 @@
 package uk.ac.tees.mad.findmyspot.ui.screens
 
+
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.foundation.Image
@@ -14,14 +15,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.delay
 import uk.ac.tees.mad.findmyspot.R
 
 @Composable
 fun SplashScreen(navController: NavController) {
     LaunchedEffect(Unit) {
-        Handler(Looper.getMainLooper()).postDelayed({
+        delay(2000)
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            navController.navigate("home") { popUpTo("splash") { inclusive = true } }
+        } else {
             navController.navigate("auth") { popUpTo("splash") { inclusive = true } }
-        }, 2000)
+        }
+
     }
 
     Box(
