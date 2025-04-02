@@ -1,5 +1,6 @@
 package uk.ac.tees.mad.findmyspot.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -41,20 +43,60 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import uk.ac.tees.mad.findmyspot.R
 
 @Composable
 fun AuthScreen(navController: NavController) {
+    val context = LocalContext.current
     var email by remember { mutableStateOf(TextFieldValue("")) }
     var password by remember { mutableStateOf(TextFieldValue("")) }
     var isLogin by remember { mutableStateOf(true) }
+    val auth = FirebaseAuth.getInstance()
+
+    fun handleAuth() {
+        if (email.text.isNotEmpty() && password.text.isNotEmpty()) {
+            if (isLogin) {
+                auth.signInWithEmailAndPassword(email.text, password.text)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+                            navController.navigate("home") { popUpTo("auth") { inclusive = true } }
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Login Failed: ${task.exception?.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+            } else {
+                auth.createUserWithEmailAndPassword(email.text, password.text)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Toast.makeText(context, "Signup Successful", Toast.LENGTH_SHORT).show()
+                            navController.navigate("home") { popUpTo("auth") { inclusive = true } }
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Signup Failed: ${task.exception?.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+            }
+        } else {
+            Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .padding(top = 24.dp)
 
     ) {
-        // App logo at the top
+        // App logo
         Image(
             painter = painterResource(id = R.drawable.app_logo),
             contentDescription = "App Logo",
@@ -146,7 +188,7 @@ fun AuthScreen(navController: NavController) {
                 }
 
                 Button(
-                    onClick = { /*   login/signup */ },
+                    onClick = { handleAuth() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
