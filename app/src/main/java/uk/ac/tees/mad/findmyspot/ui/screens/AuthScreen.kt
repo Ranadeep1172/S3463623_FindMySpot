@@ -1,5 +1,6 @@
 package uk.ac.tees.mad.findmyspot.ui.screens
 
+import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -45,7 +46,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import uk.ac.tees.mad.findmyspot.R
-
 @Composable
 fun AuthScreen(navController: NavController) {
     val context = LocalContext.current
@@ -54,39 +54,56 @@ fun AuthScreen(navController: NavController) {
     var isLogin by remember { mutableStateOf(true) }
     val auth = FirebaseAuth.getInstance()
 
+    fun isValidEmail(email: String): Boolean {
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    fun isValidPassword(password: String): Boolean {
+        return password.length >= 6
+    }
+
     fun handleAuth() {
-        if (email.text.isNotEmpty() && password.text.isNotEmpty()) {
-            if (isLogin) {
-                auth.signInWithEmailAndPassword(email.text, password.text)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
-                            navController.navigate("home") { popUpTo("auth") { inclusive = true } }
-                        } else {
-                            Toast.makeText(
-                                context,
-                                "Login Failed: ${task.exception?.message}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-            } else {
-                auth.createUserWithEmailAndPassword(email.text, password.text)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            Toast.makeText(context, "Signup Successful", Toast.LENGTH_SHORT).show()
-                            navController.navigate("home") { popUpTo("auth") { inclusive = true } }
-                        } else {
-                            Toast.makeText(
-                                context,
-                                "Signup Failed: ${task.exception?.message}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-            }
-        } else {
+        if (email.text.isEmpty() || password.text.isEmpty()) {
             Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (!isValidEmail(email.text)) {
+            Toast.makeText(context, "Invalid email format", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (!isValidPassword(password.text)) {
+            Toast.makeText(context, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (isLogin) {
+            auth.signInWithEmailAndPassword(email.text, password.text)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+                        navController.navigate("home") { popUpTo("auth") { inclusive = true } }
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "Login Failed: ${task.exception?.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+        } else {
+            auth.createUserWithEmailAndPassword(email.text, password.text)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Toast.makeText(context, "Signup Successful", Toast.LENGTH_SHORT).show()
+                        navController.navigate("home") { popUpTo("auth") { inclusive = true } }
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "Signup Failed: ${task.exception?.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
         }
     }
 
@@ -94,9 +111,7 @@ fun AuthScreen(navController: NavController) {
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 24.dp)
-
     ) {
-        // App logo
         Image(
             painter = painterResource(id = R.drawable.app_logo),
             contentDescription = "App Logo",
@@ -106,7 +121,6 @@ fun AuthScreen(navController: NavController) {
                 .size(80.dp)
         )
 
-        // Main card content
         Card(
             modifier = Modifier
                 .padding(24.dp)
@@ -229,3 +243,4 @@ fun AuthScreen(navController: NavController) {
         }
     }
 }
+
