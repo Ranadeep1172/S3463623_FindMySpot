@@ -23,6 +23,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -34,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -46,62 +48,64 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import uk.ac.tees.mad.findmyspot.R
+
 @Composable
 fun AuthScreen(navController: NavController) {
     val context = LocalContext.current
     var email by remember { mutableStateOf(TextFieldValue("")) }
     var password by remember { mutableStateOf(TextFieldValue("")) }
     var isLogin by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
     val auth = FirebaseAuth.getInstance()
 
-    fun isValidEmail(email: String): Boolean {
-        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    }
+    fun validateInput(): Boolean {
+        return when {
+            email.text.isEmpty() || password.text.isEmpty() -> {
+                errorMessage = "Please fill in all fields."
+                false
+            }
 
-    fun isValidPassword(password: String): Boolean {
-        return password.length >= 6
+            !android.util.Patterns.EMAIL_ADDRESS.matcher(email.text).matches() -> {
+                errorMessage = "Invalid email format."
+                false
+            }
+
+            password.text.length < 6 -> {
+                errorMessage = "Password must be at least 6 characters."
+                false
+            }
+
+            else -> true
+        }
     }
 
     fun handleAuth() {
-        if (email.text.isEmpty() || password.text.isEmpty()) {
-            Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
-            return
-        }
-        if (!isValidEmail(email.text)) {
-            Toast.makeText(context, "Invalid email format", Toast.LENGTH_SHORT).show()
-            return
-        }
-        if (!isValidPassword(password.text)) {
-            Toast.makeText(context, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
-            return
-        }
+        if (!validateInput()) return
+
+        isLoading = true
+        errorMessage = null
 
         if (isLogin) {
             auth.signInWithEmailAndPassword(email.text, password.text)
                 .addOnCompleteListener { task ->
+                    isLoading = false
                     if (task.isSuccessful) {
                         Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
                         navController.navigate("home") { popUpTo("auth") { inclusive = true } }
                     } else {
-                        Toast.makeText(
-                            context,
-                            "Login Failed: ${task.exception?.message}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        errorMessage = task.exception?.message ?: "Login failed. Please try again."
                     }
                 }
         } else {
             auth.createUserWithEmailAndPassword(email.text, password.text)
                 .addOnCompleteListener { task ->
+                    isLoading = false
                     if (task.isSuccessful) {
                         Toast.makeText(context, "Signup Successful", Toast.LENGTH_SHORT).show()
                         navController.navigate("home") { popUpTo("auth") { inclusive = true } }
                     } else {
-                        Toast.makeText(
-                            context,
-                            "Signup Failed: ${task.exception?.message}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        errorMessage = task.exception?.message ?: "Signup failed. Please try again."
                     }
                 }
         }
@@ -152,12 +156,7 @@ fun AuthScreen(navController: NavController) {
                     value = email,
                     onValueChange = { email = it },
                     label = { Text("Email address") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Email,
-                            contentDescription = "Email Icon"
-                        )
-                    },
+                    leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email Icon") },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Next
@@ -174,7 +173,7 @@ fun AuthScreen(navController: NavController) {
                     label = { Text("Password") },
                     leadingIcon = {
                         Icon(
-                            imageVector = Icons.Default.Lock,
+                            Icons.Default.Lock,
                             contentDescription = "Password Icon"
                         )
                     },
@@ -186,6 +185,15 @@ fun AuthScreen(navController: NavController) {
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                if (errorMessage != null) {
+                    Text(
+                        text = errorMessage!!,
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
 
                 if (isLogin) {
                     Text(
@@ -211,11 +219,18 @@ fun AuthScreen(navController: NavController) {
                         containerColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
-                    Text(
-                        text = if (isLogin) "Sign In" else "Create Account",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    } else {
+                        Text(
+                            text = if (isLogin) "Sign In" else "Create Account",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -243,4 +258,3 @@ fun AuthScreen(navController: NavController) {
         }
     }
 }
-
