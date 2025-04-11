@@ -75,4 +75,6 @@ dependencies {
     // Google Maps API
     implementation ("com.google.android.gms:play-services-maps:18.2.0")
     implementation ("com.google.android.gms:play-services-location:21.1.0")
+
+    implementation("com.google.maps.android:maps-compose:6.4.3")
 }
