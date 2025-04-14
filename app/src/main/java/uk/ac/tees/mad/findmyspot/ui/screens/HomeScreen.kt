@@ -21,6 +21,7 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -48,41 +50,24 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.launch
 import uk.ac.tees.mad.findmyspot.model.ParkingSpot
+import uk.ac.tees.mad.findmyspot.viewmodels.ParkingViewModel
 
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    viewModel: ParkingViewModel = viewModel()
+) {
     val context = LocalContext.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     val cameraPositionState = rememberCameraPositionState()
     val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
-    var parkingSpots by remember { mutableStateOf<List<ParkingSpot>>(emptyList()) }
+    val parkingSpots by viewModel.parkingSpots.collectAsState()
 
     var userLocation by remember { mutableStateOf<LatLng?>(null) }
     var selectedSpot by remember { mutableStateOf<ParkingSpot?>(null) }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-
-    // Fetch parking spots from Firestore
-    LaunchedEffect(Unit) {
-        val db = FirebaseFirestore.getInstance()
-
-        db.collection("parking_spots").get()
-            .addOnSuccessListener { documents ->
-                parkingSpots = documents.mapNotNull { doc ->
-                    val name = doc.getString("name")
-                    val latitude = doc.getDouble("latitude")
-                    val longitude = doc.getDouble("longitude")
-                    val availability = doc.getString("availability")
-                    val pricePerHour = doc.getDouble("price_per_hour")
-
-                    if (name != null && latitude != null && longitude != null && availability != null && pricePerHour != null) {
-                        ParkingSpot(name, LatLng(latitude, longitude), availability, pricePerHour)
-                    } else null
-                }
-            }
-    }
 
     LaunchedEffect(permissionState) {
         if (permissionState.status.isGranted) {
