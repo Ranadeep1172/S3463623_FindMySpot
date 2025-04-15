@@ -3,7 +3,6 @@ package uk.ac.tees.mad.findmyspot.ui.screens
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -33,17 +32,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
@@ -56,6 +53,7 @@ import uk.ac.tees.mad.findmyspot.viewmodels.ParkingViewModel
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    navController: NavController,
     viewModel: ParkingViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -101,7 +99,9 @@ fun HomeScreen(
     BottomSheetScaffold(
         sheetContent = {
             selectedSpot?.let { spot ->
-                ParkingSpotDetails(spot) {
+                ParkingSpotDetails(spot, onDetails = {
+                    navController.navigate("spot_detail/${spot.id}")
+                }) {
                     selectedSpot = null
                     scope.launch {
                         bottomSheetState.hide()
@@ -156,7 +156,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun ParkingSpotDetails(spot: ParkingSpot, onDismiss: () -> Unit) {
+fun ParkingSpotDetails(spot: ParkingSpot, onDetails: () -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current
     Column(
         modifier = Modifier
@@ -184,17 +184,10 @@ fun ParkingSpotDetails(spot: ParkingSpot, onDismiss: () -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = {
-                val gmmIntentUri =
-                    Uri.parse("geo:${spot.location.latitude},${spot.location.longitude}?q=${spot.name}")
-                val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
-                mapIntent.setPackage("com.google.android.apps.maps")
-                onDismiss()
-                context.startActivity(mapIntent)
-            },
+            onClick = onDetails,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Navigate to Parking Spot")
+            Text("More details")
         }
 
         Spacer(modifier = Modifier.height(8.dp))

@@ -33,11 +33,18 @@ class ParkingViewModel : ViewModel() {
                 val pricePerHour = doc.getDouble("price_per_hour")
 
                 if (name != null && latitude != null && longitude != null && availability != null && pricePerHour != null) {
-                    ParkingSpot(name, LatLng(latitude, longitude), availability, pricePerHour)
+                    ParkingSpot(
+                        doc.id, name,
+                        LatLng(latitude, longitude), availability, pricePerHour
+                    )
                 } else null
             } ?: emptyList()
 
             _parkingSpots.value = spotsList
         }
+    }
+
+    fun getParkingSpotById(spotId: String): ParkingSpot? = _parkingSpots.value.find {
+        it.id == spotId
     }
 }
