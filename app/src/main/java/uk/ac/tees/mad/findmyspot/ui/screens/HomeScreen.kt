@@ -1,21 +1,25 @@
 package uk.ac.tees.mad.findmyspot.ui.screens
 
 import android.annotation.SuppressLint
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -32,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -110,44 +115,62 @@ fun HomeScreen(
             }
         },
         scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState),
-        sheetPeekHeight = 0.dp
+        sheetPeekHeight = 0.dp,
+        topBar = {
+            TopAppBar(
+                title = { Text("FindMySpot") }
+            )
+        }
     ) {
-        if (!permissionState.status.isGranted) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text("Location permission is required to display your location.")
-                Button(onClick = { permissionState.launchPermissionRequest() }) {
-                    Text("Grant Permission")
-                }
-            }
-        } else {
-            GoogleMap(
-                modifier = Modifier.fillMaxSize(),
-                cameraPositionState = cameraPositionState
-            ) {
-                userLocation?.let {
-                    Marker(
-                        state = MarkerState(position = it),
-                        title = "You are here",
-                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
-                    )
-                }
 
-                // markers for parking spots
-                parkingSpots.forEach { spot ->
-                    Marker(
-                        state = MarkerState(position = spot.location),
-                        title = spot.name,
-                        snippet = "Availability: ${spot.availability} | Price: $${spot.pricePerHour}/hr",
-                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),
-                        onClick = {
-                            selectedSpot = spot
-                            true
-                        }
-                    )
+        Box(modifier = Modifier.fillMaxSize()) {
+            FloatingActionButton(
+                onClick = { navController.navigate("add_spot") },
+                modifier = Modifier
+                    .padding(end = 16.dp, bottom = 100.dp)
+                    .zIndex(1f)
+                    .align(Alignment.BottomEnd),
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add Spot")
+            }
+            if (!permissionState.status.isGranted) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("Location permission is required to display your location.")
+                    Button(onClick = { permissionState.launchPermissionRequest() }) {
+                        Text("Grant Permission")
+                    }
+                }
+            } else {
+                GoogleMap(
+                    modifier = Modifier.fillMaxSize(),
+                    cameraPositionState = cameraPositionState
+                ) {
+                    userLocation?.let {
+                        Marker(
+                            state = MarkerState(position = it),
+                            title = "You are here",
+                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
+                        )
+                    }
+
+                    // markers for parking spots
+                    parkingSpots.forEach { spot ->
+                        Marker(
+                            state = MarkerState(position = spot.location),
+                            title = spot.name,
+                            snippet = "Availability: ${spot.availability} | Price: $${spot.pricePerHour}/hr",
+                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),
+                            onClick = {
+                                selectedSpot = spot
+                                true
+                            }
+                        )
+                    }
                 }
             }
         }

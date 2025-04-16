@@ -47,4 +47,20 @@ class ParkingViewModel : ViewModel() {
     fun getParkingSpotById(spotId: String): ParkingSpot? = _parkingSpots.value.find {
         it.id == spotId
     }
+
+    fun addParkingSpot(newSpot: ParkingSpot, onSuccess: () -> Boolean) {
+        val spotData = hashMapOf(
+            "name" to newSpot.name,
+            "latitude" to newSpot.location.latitude,
+            "longitude" to newSpot.location.longitude,
+            "availability" to newSpot.availability,
+            "price_per_hour" to newSpot.pricePerHour
+        )
+        db.collection("parking_spots").document(newSpot.id).set(spotData).addOnSuccessListener {
+            fetchParkingSpots()
+            onSuccess()
+        }.addOnFailureListener {
+            Log.e("Firestore", "Error adding parking spot", it)
+        }
+    }
 }

@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import uk.ac.tees.mad.findmyspot.ui.screens.AddSpotScreen
 import uk.ac.tees.mad.findmyspot.ui.screens.AuthScreen
 import uk.ac.tees.mad.findmyspot.ui.screens.HomeScreen
 import uk.ac.tees.mad.findmyspot.ui.screens.SplashScreen
@@ -35,6 +36,9 @@ fun AppNavigation() {
             spot?.let {
                 SpotDetailScreen(spot = it, onBack = { navController.popBackStack() })
             }
+        }
+        composable("add_spot") {
+            AddSpotScreen(navController, viewModel)
         }
     }
 }
