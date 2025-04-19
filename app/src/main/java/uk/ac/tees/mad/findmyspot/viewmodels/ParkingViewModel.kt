@@ -63,4 +63,37 @@ class ParkingViewModel : ViewModel() {
             Log.e("Firestore", "Error adding parking spot", it)
         }
     }
+
+    fun updateParkingSpot(updatedSpot: ParkingSpot, onSuccess: () -> Unit) {
+        val spotData = hashMapOf(
+            "name" to updatedSpot.name,
+            "latitude" to updatedSpot.location.latitude,
+            "longitude" to updatedSpot.location.longitude,
+            "availability" to updatedSpot.availability,
+            "price_per_hour" to updatedSpot.pricePerHour
+        )
+
+        db.collection("parking_spots").document(updatedSpot.id)
+            .set(spotData)
+            .addOnSuccessListener {
+                fetchParkingSpots()
+                onSuccess()
+            }
+            .addOnFailureListener {
+                Log.e("Firestore", "Error updating parking spot", it)
+            }
+    }
+
+    fun deleteParkingSpot(spotId: String, onSuccess: () -> Unit) {
+        db.collection("parking_spots").document(spotId)
+            .delete()
+            .addOnSuccessListener {
+                fetchParkingSpots()
+                onSuccess()
+            }
+            .addOnFailureListener {
+                Log.e("Firestore", "Error deleting parking spot", it)
+            }
+    }
+
 }

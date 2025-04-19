@@ -38,7 +38,8 @@ import uk.ac.tees.mad.findmyspot.model.ParkingSpot
 @Composable
 fun SpotDetailScreen(
     spot: ParkingSpot,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onEdit: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -116,6 +117,16 @@ fun SpotDetailScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text("Reserve Spot")
+            }
+
+            Button(
+                onClick = onEdit,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text("Edit details")
             }
         }
     }
