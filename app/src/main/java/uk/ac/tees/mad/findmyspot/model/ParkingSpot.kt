@@ -7,5 +7,6 @@ data class ParkingSpot(
     val name: String,
     val location: LatLng,
     val availability: String,
-    val pricePerHour: Double
+    val pricePerHour: Double,
+    val imageBase64: String? = null
 )

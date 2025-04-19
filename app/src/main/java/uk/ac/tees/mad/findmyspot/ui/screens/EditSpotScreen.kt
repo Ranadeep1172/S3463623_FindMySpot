@@ -1,6 +1,7 @@
 package uk.ac.tees.mad.findmyspot.ui.screens
 
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,25 +20,19 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import uk.ac.tees.mad.findmyspot.model.ParkingSpot
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditSpotScreen(
     spot: ParkingSpot,
@@ -45,25 +40,11 @@ fun EditSpotScreen(
     onDone: (ParkingSpot) -> Unit,
     onDelete: () -> Unit,
 ) {
-    val context = LocalContext.current
-
     var name by remember { mutableStateOf(spot.name) }
     var availability by remember { mutableStateOf(spot.availability) }
     var pricePerHour by remember { mutableStateOf(spot.pricePerHour.toString()) }
 
-    var userLocation by remember { mutableStateOf(spot.location) }
-    val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
-    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
-
-    LaunchedEffect(permissionState) {
-        if (permissionState.status.isGranted) {
-            getLocation(fusedLocationClient, onGetLocation = {
-                userLocation = it
-            })
-        } else {
-            permissionState.launchPermissionRequest()
-        }
-    }
+    val userLocation by remember { mutableStateOf(spot.location) }
 
     Scaffold(
         topBar = {
@@ -139,6 +120,7 @@ fun EditSpotScreen(
 }
 
 
+@SuppressLint("MissingPermission")
 fun getLocation(
     fusedLocationClient: FusedLocationProviderClient,
     onGetLocation: (LatLng) -> Unit

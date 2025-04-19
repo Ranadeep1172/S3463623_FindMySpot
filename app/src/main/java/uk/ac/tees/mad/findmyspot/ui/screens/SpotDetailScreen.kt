@@ -25,14 +25,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import uk.ac.tees.mad.findmyspot.R
 import uk.ac.tees.mad.findmyspot.model.ParkingSpot
+import uk.ac.tees.mad.findmyspot.viewmodels.decodeBase64ToImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +45,7 @@ fun SpotDetailScreen(
     onEdit: () -> Unit
 ) {
     val context = LocalContext.current
+    val bitmap = remember(spot.imageBase64) { spot.imageBase64?.let { decodeBase64ToImage(it) } }
 
     Scaffold(
         topBar = {
@@ -61,14 +65,27 @@ fun SpotDetailScreen(
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.parking),
-                contentDescription = "Parking Spot Image",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(16.dp))
-            )
+
+            if (bitmap != null) {
+                Image(
+                    bitmap = bitmap,
+                    contentDescription = "Parking Spot Image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(16.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Image(
+                    painter = painterResource(id = R.drawable.parking), // Fallback image
+                    contentDescription = "Default Parking Spot Image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 

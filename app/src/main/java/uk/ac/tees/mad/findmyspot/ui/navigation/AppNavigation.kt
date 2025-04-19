@@ -67,7 +67,7 @@ fun AppNavigation() {
                     }
                 }, onDone = { newSpot ->
                     viewModel.updateParkingSpot(newSpot) {
-                        Log.d("ASDFZG", "KJHG")
+                        Log.d("ASDFZG", "Updated spot")
                         Toast.makeText(context, "Spot updated!", Toast.LENGTH_SHORT).show()
                         navController.popBackStack()
                     }
