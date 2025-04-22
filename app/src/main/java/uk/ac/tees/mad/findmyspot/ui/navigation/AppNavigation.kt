@@ -13,6 +13,7 @@ import uk.ac.tees.mad.findmyspot.ui.screens.AddSpotScreen
 import uk.ac.tees.mad.findmyspot.ui.screens.AuthScreen
 import uk.ac.tees.mad.findmyspot.ui.screens.EditSpotScreen
 import uk.ac.tees.mad.findmyspot.ui.screens.HomeScreen
+import uk.ac.tees.mad.findmyspot.ui.screens.ProfileScreen
 import uk.ac.tees.mad.findmyspot.ui.screens.SplashScreen
 import uk.ac.tees.mad.findmyspot.ui.screens.SpotDetailScreen
 import uk.ac.tees.mad.findmyspot.viewmodels.ParkingViewModel
@@ -76,5 +77,18 @@ fun AppNavigation() {
             }
 
         }
+
+        composable("profile_screen") {
+            ProfileScreen(
+                onLogout = {
+
+                    navController.navigate("auth") {
+                        popUpTo("profile_screen") { inclusive = true }
+                    }
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
     }
 }
