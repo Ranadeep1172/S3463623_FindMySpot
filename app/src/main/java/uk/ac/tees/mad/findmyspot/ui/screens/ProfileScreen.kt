@@ -46,15 +46,16 @@ fun ProfileScreen(
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
+    val db = remember { FirebaseFirestore.getInstance() }
+    val auth = remember { FirebaseAuth.getInstance() }
 
     LaunchedEffect(Unit) {
-        val db = FirebaseFirestore.getInstance()
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@LaunchedEffect
+        val userId = auth.currentUser?.uid ?: return@LaunchedEffect
         db.collection("users").document(userId)
             .get()
             .addOnSuccessListener {
                 name = it.getString("name") ?: ""
-                email = it.getString("email") ?: ""
+                email = auth.currentUser?.email ?: ""
                 phone = it.getString("phone") ?: ""
             }
             .addOnFailureListener {
@@ -105,7 +106,6 @@ fun ProfileScreen(
 
             Button(
                 onClick = {
-                    val db = FirebaseFirestore.getInstance()
                     val user = hashMapOf(
                         "name" to name,
                         "phone" to phone
@@ -129,7 +129,10 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = onLogout,
+                onClick = {
+                    auth.signOut()
+                    onLogout()
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.errorContainer,
                     contentColor = MaterialTheme.colorScheme.onErrorContainer

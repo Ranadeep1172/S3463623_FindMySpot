@@ -44,7 +44,7 @@ fun EditSpotScreen(
     var availability by remember { mutableStateOf(spot.availability) }
     var pricePerHour by remember { mutableStateOf(spot.pricePerHour.toString()) }
 
-    val userLocation by remember { mutableStateOf(spot.location) }
+    val userLocation by remember { mutableStateOf(LatLng(spot.latitude, spot.longitude)) }
 
     Scaffold(
         topBar = {
@@ -96,7 +96,8 @@ fun EditSpotScreen(
                     userLocation.let { location ->
                         val updatedSpot = spot.copy(
                             name = name,
-                            location = location,
+                            latitude = location.latitude,
+                            longitude = location.longitude,
                             availability = availability,
                             pricePerHour = pricePerHour.toDouble()
                         )

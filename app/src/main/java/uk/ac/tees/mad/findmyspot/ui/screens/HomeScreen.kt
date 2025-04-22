@@ -171,7 +171,7 @@ fun HomeScreen(
                     // markers for parking spots
                     parkingSpots.forEach { spot ->
                         Marker(
-                            state = MarkerState(position = spot.location),
+                            state = MarkerState(position = LatLng(spot.latitude, spot.longitude)),
                             title = spot.name,
                             snippet = "Availability: ${spot.availability} | Price: $${spot.pricePerHour}/hr",
                             icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),

@@ -108,7 +108,7 @@ fun SpotDetailScreen(
             Button(
                 onClick = {
                     val gmmIntentUri =
-                        Uri.parse("geo:${spot.location.latitude},${spot.location.longitude}")
+                        Uri.parse("geo:${spot.latitude},${spot.longitude}")
                     val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
                     mapIntent.setPackage("com.google.android.apps.maps")
                     context.startActivity(mapIntent)
